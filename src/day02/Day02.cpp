@@ -4,7 +4,7 @@
 #include <array>
 #include "file_utils.h"
 
-int getPoints(const std::vector<std::string>& lines, const std::function<int(const int&, const int&&)>& getScore) {
+int getPoints(const std::vector<std::string>& lines, const auto& getScore) {
     constexpr auto points = std::array<int, 5> { 6, 0, 3, 6, 0 };
     constexpr auto moves = std::array<int, 5> { 3, 1, 2, 3, 1 };
 
