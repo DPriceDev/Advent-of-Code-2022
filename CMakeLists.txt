@@ -7,3 +7,4 @@ add_subdirectory(src/utils)
 
 add_subdirectory(src/day01)
 add_subdirectory(src/day02)
+add_subdirectory(src/day03)

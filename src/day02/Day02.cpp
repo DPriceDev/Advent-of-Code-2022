@@ -4,7 +4,7 @@
 #include <array>
 #include "file_utils.h"
 
-int getPoints(const std::vector<std::string>& lines, const auto& getScore) {
+auto getPoints(const std::vector<std::string>& lines, const auto& getScore) -> int {
     constexpr auto points = std::array<int, 5> { 6, 0, 3, 6, 0 };
     constexpr auto moves = std::array<int, 5> { 3, 1, 2, 3, 1 };
 
@@ -17,7 +17,7 @@ int getPoints(const std::vector<std::string>& lines, const auto& getScore) {
     return score;
 }
 
-int main() {
+auto main() -> int {
     const auto lines = file::getLines("input.txt");
 
     const auto partOne = getPoints(lines, [] (const int& theirs, const int& ours) { return ours; });

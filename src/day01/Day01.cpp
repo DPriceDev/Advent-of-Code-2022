@@ -4,7 +4,7 @@
 #include <algorithm>
 #include "file_utils.h"
 
-std::vector<int> parseTotalCalories(const std::vector<std::string>& lines) {
+auto parseTotalCalories(const std::vector<std::string>& lines) -> std::vector<int> {
     std::vector<int> calories { 0 };
     for(const auto & line : lines) {
         if (line.empty()) calories.push_back(0); else calories.back() += stoi(line);
@@ -12,7 +12,7 @@ std::vector<int> parseTotalCalories(const std::vector<std::string>& lines) {
     return calories;
 }
 
-int main() {
+auto main() -> int {
     const auto lines = file::getLines("input.txt");
     auto totalCalories = parseTotalCalories(lines);
 
