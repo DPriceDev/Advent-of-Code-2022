@@ -23,7 +23,7 @@ auto main() -> int {
     auto partTwo = 0;
     for (const auto & line : lines) {
         auto [a1, a2, b1, b2] = parsePairs(line);
-        if ((a1 >= b1 && a1 <= b2 || a2 >= b1 && a2 <= b2) || (b1 >= a1 && b1 <= a2 || b2 >= a1 && b2 <= a2)) ++partTwo;
+        if (a1 >= b1 && a1 <= b2 || a2 >= b1 && a2 <= b2) ++partTwo;
     }
 
     std::cout << "Part 1: " << partOne << '\n' << "Part 2: " << partTwo;
