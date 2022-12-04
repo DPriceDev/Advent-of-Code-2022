@@ -1,9 +1,7 @@
 #include <iostream>
 #include <vector>
-#include <set>
-#include <functional>
 #include <array>
-#include <numeric>
+#include <chrono>
 #include "file_utils.h"
 
 auto getPriority(const char& letter) -> int {
@@ -17,7 +15,7 @@ constexpr auto findMatchingTypes(std::vector<std::string_view>&& lines) -> int {
     for (std::size_t index = 0; index < lines.size() - 1; ++index) {
         for (const auto& letter : lines[index]) {
             const auto priority = getPriority(letter);
-            if (types[priority - 1] == index) types[priority - 1] += 1;
+            types[priority - 1] += types[priority - 1] == index;
         }
     }
 
