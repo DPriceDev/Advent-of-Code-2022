@@ -15,15 +15,11 @@ auto main() -> int {
     const auto lines = file::getLines("input.txt");
 
     auto partOne = 0;
-    for (const auto & line : lines) {
-        auto [a1, a2, b1, b2] = parsePairs(line);
-        if ((a1 >= b1 && a1 <= b2 && a2 >= b1 && a2 <= b2) || (b1 >= a1 && b1 <= a2 && b2 >= a1 && b2 <= a2)) ++partOne;
-    }
-
     auto partTwo = 0;
     for (const auto & line : lines) {
-        auto [a1, a2, b1, b2] = parsePairs(line);
-        if (a1 >= b1 && a1 <= b2 || a2 >= b1 && a2 <= b2) ++partTwo;
+        const auto [a1, a2, b1, b2] = parsePairs(line);
+        if ((a1 >= b1 && a1 <= b2 && a2 >= b1 && a2 <= b2) || (b1 >= a1 && b1 <= a2 && b2 >= a1 && b2 <= a2)) ++partOne;
+        if (a1 >= b1 && a1 <= b2 || a2 >= b1 && a2 <= b2 || b1 >= a1 && b1 <= a2 || b2 >= a1 && b2 <= a2) ++partTwo;
     }
 
     std::cout << "Part 1: " << partOne << '\n' << "Part 2: " << partTwo;
