@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <array>
-#include <chrono>
 #include "file_utils.h"
 
 auto getPriority(const char& letter) -> int {
@@ -22,7 +21,7 @@ constexpr auto findMatchingTypes(std::vector<std::string_view>&& lines) -> int {
     auto sum = 0;
     for(const auto& letter: lines.back()) {
         const auto priority = getPriority(letter);
-        sum += types[priority - 1] / (lines.size() - 1) * priority;
+        sum += (types[priority - 1] == lines.size() - 1) * priority;
         types[priority - 1] = 0;
     }
     return sum;
