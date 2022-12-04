@@ -33,12 +33,12 @@ auto main() -> int {
     auto partOne = 0;
     for (const auto  & line : lines) {
         const auto middleIterator = line.begin() + line.length() / 2;
-        partOne += findMatchingTypes({ {line.begin(),   middleIterator}, {middleIterator, line.end()} });
+        partOne += findMatchingTypes({{ line.begin(), middleIterator }, { middleIterator, line.end() }});
     }
 
     auto partTwo = 0;
     for (std::size_t index = 0; index < lines.size(); index += 3) {
-        partTwo += findMatchingTypes({lines[index], lines[index + 1], lines[index + 2]});
+        partTwo += findMatchingTypes({ lines[index], lines[index + 1], lines[index + 2] });
     }
 
     std::cout << "Part 1: " << partOne << '\n' << "Part 2: " << partTwo;
