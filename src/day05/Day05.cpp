@@ -7,13 +7,12 @@
 const std::regex regex { R"(move (\d+) from (\d+) to (\d))" };
 
 auto parseStacks(const std::span<std::basic_string<char>>&& lines) -> std::vector<std::vector<char>> {
-    std::vector<std::vector<char>> stacks { (lines.rbegin()->size() / 4) + 2 };
+    std::vector<std::vector<char>> stacks { (lines.rbegin()->size() / 4) + 1 };
     std::for_each(lines.rbegin(), lines.rend(), [&stacks] (const auto& line) {
         for (int index = 0; index < line.length(); index += 4) {
             if (line[index] != ' ') stacks[index / 4].emplace_back(line[index + 1]);
         }
     });
-    stacks.pop_back();
     return stacks;
 }
 
