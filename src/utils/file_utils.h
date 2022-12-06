@@ -17,6 +17,17 @@ namespace file {
         return lines;
     }
 
+    auto readText(const std::string& filename) -> std::string {
+        std::ifstream input { filename };
+        std::string line;
+        std::string output;
+
+        while (getline(input, line)) {
+            output += line;
+        }
+        return output;
+    }
+
 }
 
 #endif // ADVENT_OF_CODE_2022_CPP_FILE_UTILS_H
