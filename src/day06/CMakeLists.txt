@@ -4,4 +4,8 @@ add_executable(day_06 Day06.cpp)
 target_link_libraries(day_06 PUBLIC utils)
 target_compile_features(day_06 INTERFACE cxx_std_23)
 
+add_executable(day_06_alt Day06_alternative.cpp)
+target_link_libraries(day_06_alt PUBLIC utils)
+target_compile_features(day_06_alt INTERFACE cxx_std_23)
+
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/input.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
