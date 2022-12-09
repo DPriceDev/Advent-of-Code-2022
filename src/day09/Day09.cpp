@@ -1,7 +1,9 @@
 #include "file_utils.h"
+#include "string_utils.h"
 #include <iostream>
 #include <vector>
 #include <sstream>
+#include <charconv>
 #include <set>
 
 struct Knot {
@@ -9,54 +11,37 @@ struct Knot {
     int y { 0 };
 };
 
+void updateDirection(auto& a, auto& b, const auto diff, const auto comp, const auto movement) {
+    a -= (diff == 1) * comp;
+    a += (diff == -1) * comp;
+    b += comp * movement;
+}
+
 auto moveLong(std::vector<std::string>& moves, std::size_t length) -> size_t {
     std::vector<Knot> rope { length };
-    // todo: replace with vector array?
     std::set<std::pair<int, int>> visited {{ 0, 0 }};
 
     for (const auto& move : moves) {
-        // todo: shrink?
-        std::stringstream stream { move };
-        char direction;
-        int distance;
-        stream >> direction;
-        stream >> distance;
+        const auto split = string::splitString(move, ' ');
+        std::size_t distance;
+        std::from_chars(split.back().begin(), split.back().end(), distance);
 
-        for (int step = 0; step < distance; ++step) {
-            rope.front().y += direction == 'U';
-            rope.front().y -= direction == 'D';
-            rope.front().x -= direction == 'L';
-            rope.front().x += direction == 'R';
+        for (size_t step = 0; step < distance; ++step) {
+            rope.front().y += split.front() == "U";
+            rope.front().y -= split.front() == "D";
+            rope.front().x -= split.front() == "L";
+            rope.front().x += split.front() == "R";
 
-            for (int i = 1; i < length; ++i) {
-                auto x = rope[i - 1].x;
-                auto y = rope[i - 1].y;
-                auto tx = rope[i].x;
-                auto ty = rope[i].y;
+            for (size_t i = 1; i < length; ++i) {
+                const auto x = rope[i - 1].x;
+                const auto y = rope[i - 1].y;
+                const auto tx = rope[i].x;
+                const auto ty = rope[i].y;
 
-                // todo: can this be rotated?
-                const auto txx = tx - x == 2;
-                rope[i].y -= (ty - y == 1) * txx;
-                rope[i].y += (ty - y == -1) * txx;
-
-                rope[i].x -= txx;
-
-                const auto ntxx = tx - x == -2;
-                rope[i].y -= (ty - y == 1) * ntxx;
-                rope[i].y += (ty - y == -1) * ntxx;
-
-                rope[i].x += ntxx;
-
-                const auto tyy = ty - y == 2;
-                rope[i].x -= (tx - x == 1) * tyy;
-                rope[i].x += (tx - x == -1) * tyy;
-                rope[i].y -= tyy;
-
-                const auto ntyy = ty - y == -2;
-                rope[i].x -= (tx - x == 1) * ntyy;
-                rope[i].x += (tx - x == -1) * ntyy;
-
-                rope[i].y += ntyy;
+                updateDirection(rope[i].y, rope[i].x, ty - y, tx - x == 2, -1);
+                updateDirection(rope[i].y, rope[i].x, ty - y, tx - x == -2, 1);
+                updateDirection(rope[i].x, rope[i].y, tx - x, ty - y == 2, -1);
+                updateDirection(rope[i].x, rope[i].y, tx - x, ty - y == -2, 1);
             }
             visited.insert({ rope.back().x, rope.back().y });
         }
