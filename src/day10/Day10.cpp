@@ -7,11 +7,11 @@ auto parse(const std::vector<std::string>& lines, const auto&& onAction) {
     auto cycle = 0;
     auto x = 1;
     for (const auto& line : lines) {
-        if (line == "noop") onAction(cycle, x);
-        else if (line.starts_with("addx")) {
+        onAction(cycle, x);
+        if (line.starts_with("addx")) {
             int value;
             std::from_chars(line.data() + 5, line.data() + line.size(), value);
-            for (int i = 0; i < 2; ++i) onAction(cycle, x);
+            onAction(cycle, x);
             x += value;
         }
     }
@@ -21,7 +21,7 @@ auto partOne(const std::vector<std::string>& lines) -> int {
     auto multiple = 0;
     parse(lines, [&] (auto& cycle, const auto& x) {
         ++cycle;
-        if ((cycle - 20) % 40 == 0) multiple += (x * cycle);
+        multiple += (x * cycle) * ((cycle - 20) % 40 == 0);
     });
     return multiple;
 }
