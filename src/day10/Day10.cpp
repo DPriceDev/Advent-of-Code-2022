@@ -19,7 +19,7 @@ auto parse(const std::vector<std::string>& lines, const auto&& onAction) {
 
 auto partOne(const std::vector<std::string>& lines) -> int {
     auto multiple = 0;
-    parse(lines, [&] (auto& cycle, const auto& x) {
+    parse(lines, [&] (auto& cycle, const auto x) {
         ++cycle;
         multiple += (x * cycle) * ((cycle - 20) % 40 == 0);
     });
@@ -27,7 +27,7 @@ auto partOne(const std::vector<std::string>& lines) -> int {
 }
 
 auto partTwo(const std::vector<std::string>& lines) {
-    parse(lines, [&] (auto& cycle, const auto& x) {
+    parse(lines, [] (auto& cycle, const auto x) {
         if (cycle % 40 == 0) std::cout << "\n";
         const auto current = cycle - (40 * (cycle / 40));
         std::cout << ((x >= current - 1 && x <= current + 1) ? '#' : ' ');
