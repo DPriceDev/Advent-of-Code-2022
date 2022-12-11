@@ -1,4 +1,4 @@
-#include "file_utils.h"
+#include "Day09.h"
 #include "string_utils.h"
 #include <iostream>
 #include <vector>
@@ -17,7 +17,7 @@ void updateDirection(auto& a, auto& b, const auto diff, const auto comp, const a
     b += comp * movement;
 }
 
-auto moveLong(std::vector<std::string>& moves, std::size_t length) -> size_t {
+auto moveLong(const std::vector<std::string>& moves, std::size_t length) -> size_t {
     std::vector<Knot> rope { length };
     std::set<std::pair<int, int>> visited {{ 0, 0 }};
 
@@ -49,12 +49,10 @@ auto moveLong(std::vector<std::string>& moves, std::size_t length) -> size_t {
     return visited.size();
 }
 
-auto main() -> int {
-    auto moves = file::getLines("input.txt");
+auto Day09::partOne(const std::vector<std::string>& lines) -> size_t {
+    return moveLong(lines, 2);
+}
 
-    const auto partOne = moveLong(moves, 2);
-    const auto partTwo = moveLong(moves, 10);
-
-    std::cout << "part 1: " << partOne << "\npart 2: " << partTwo;
-    return 0;
+auto Day09::partTwo(const std::vector<std::string>& lines) -> size_t {
+    return moveLong(lines, 10);
 }
