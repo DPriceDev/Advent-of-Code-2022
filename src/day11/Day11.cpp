@@ -1,6 +1,5 @@
 #include "Day11.h"
 #include "string_utils.h"
-#include <iostream>
 #include <algorithm>
 #include <charconv>
 #include <list>
@@ -103,9 +102,3 @@ auto Day11::partTwo(std::vector<std::string>& lines) -> size_t {
     const auto byCommonDivisor = [&commonDivisor] (const auto worry) { return worry % commonDivisor; };
     return chaseMonkeys(monkeys, 10000, byCommonDivisor);
 }
-
-//auto main() -> int {
-//    auto lines = file::getLines("input.txt");
-//    std::cout << "part 1: " << Day11::partOne(lines) << "\npart 2: " << Day11::partTwo(lines);
-//    return 0;
-//}

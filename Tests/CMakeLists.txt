@@ -2,10 +2,12 @@ cmake_minimum_required(VERSION 3.20.0)
 
 add_executable(tests
         day06/Day06Tests.cpp
+        Day10/Day10Tests.cpp
         day11/Day11Tests.cpp
 )
 target_link_libraries(tests PRIVATE
         day_06
+        day_10
         day_11
         util
 )

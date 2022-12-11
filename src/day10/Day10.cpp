@@ -1,4 +1,4 @@
-#include "file_utils.h"
+#include "Day10.h"
 #include <iostream>
 #include <vector>
 #include <charconv>
@@ -17,7 +17,7 @@ auto parse(const std::vector<std::string>& lines, const auto&& onAction) {
     }
 }
 
-auto partOne(const std::vector<std::string>& lines) -> int {
+auto Day10::partOne(const std::vector<std::string>& lines) -> size_t {
     auto multiple = 0;
     parse(lines, [&multiple] (auto& cycle, const auto x) {
         ++cycle;
@@ -26,19 +26,11 @@ auto partOne(const std::vector<std::string>& lines) -> int {
     return multiple;
 }
 
-auto partTwo(const std::vector<std::string>& lines) {
+void Day10::partTwo(const std::vector<std::string>& lines) {
     parse(lines, [] (auto& cycle, const auto x) {
         if (cycle % 40 == 0) std::cout << "\n";
         const auto current = cycle - (40 * (cycle / 40));
         std::cout << ((x >= current - 1 && x <= current + 1) ? '#' : ' ');
         ++cycle;
     });
-}
-
-auto main() -> int {
-    auto lines = file::getLines("input.txt");
-    const auto one = partOne(lines);
-    std::cout << "\npart 1: " << one << "\npart 2:";
-    partTwo(lines);
-    return 0;
 }

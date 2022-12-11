@@ -1,5 +1,4 @@
 #include "Day06.h"
-#include <iostream>
 #include <ranges>
 #include <algorithm>
 #include <expected>
