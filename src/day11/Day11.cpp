@@ -1,7 +1,6 @@
-#include "file_utils.h"
+#include "Day11.h"
 #include "string_utils.h"
 #include <iostream>
-#include <vector>
 #include <algorithm>
 #include <charconv>
 #include <list>
@@ -88,13 +87,13 @@ auto chaseMonkeys(std::vector<Monkey>& monkeys, const std::size_t rounds, const 
     return *counts.rbegin() * *(counts.rbegin() + 1);
 }
 
-auto partOne(std::vector<std::string>& lines) -> size_t {
+auto Day11::partOne(std::vector<std::string>& lines) -> size_t {
     auto monkeys = parseMonkeys(lines);
     const auto divThree = [] (const auto worry) { return worry / 3; };
     return chaseMonkeys(monkeys, 20, divThree);
 }
 
-auto partTwo(std::vector<std::string>& lines) -> size_t {
+auto Day11::partTwo(std::vector<std::string>& lines) -> size_t {
     auto monkeys = parseMonkeys(lines);
 
     const auto toDivisor = [] (const auto& a) { return a.testDivisor; };
@@ -105,8 +104,8 @@ auto partTwo(std::vector<std::string>& lines) -> size_t {
     return chaseMonkeys(monkeys, 10000, byCommonDivisor);
 }
 
-auto main() -> int {
-    auto lines = file::getLines("input.txt");
-    std::cout << "part 1: " << partOne(lines) << "\npart 2: " << partTwo(lines);
-    return 0;
-}
+//auto main() -> int {
+//    auto lines = file::getLines("input.txt");
+//    std::cout << "part 1: " << Day11::partOne(lines) << "\npart 2: " << Day11::partTwo(lines);
+//    return 0;
+//}

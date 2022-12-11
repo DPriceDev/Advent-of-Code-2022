@@ -1,5 +1,5 @@
+#include "Day06.h"
 #include <iostream>
-#include "file_utils.h"
 #include <ranges>
 #include <algorithm>
 #include <expected>
@@ -21,12 +21,10 @@ constexpr auto indexOfUniqueString(const std::string_view message, const std::si
     }
 }
 
-auto main() -> int {
-    const auto input = file::readText("input.txt");
+auto Day06::partOneAlt(std::string& input) -> size_t {
+    return indexOfUniqueString(input, 4);
+}
 
-    auto partOne = indexOfUniqueString(input, 4);
-    auto partTwo = indexOfUniqueString(input, 14);
-
-    std::cout << "Part 1: " << partOne << '\n' << "Part 2: " << partTwo;
-    return 0;
+auto Day06::partTwoAlt(std::string& input) -> size_t {
+    return indexOfUniqueString(input, 14);
 }

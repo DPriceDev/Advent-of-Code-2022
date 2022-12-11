@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 3.20.0)
 
-add_executable(day_06 Day06.cpp)
+add_library(day_06 Day06.cpp Day06_alternative.cpp Day06.h)
 target_link_libraries(day_06 PUBLIC utils)
+target_include_directories(day_06 PUBLIC .)
 target_compile_features(day_06 INTERFACE cxx_std_23)
-
-add_executable(day_06_alt Day06_alternative.cpp)
-target_link_libraries(day_06_alt PUBLIC utils)
-target_compile_features(day_06_alt INTERFACE cxx_std_23)
-
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/input.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

@@ -3,16 +3,18 @@ project(advent_of_code_2022_cpp)
 
 set(CMAKE_CXX_STANDARD 23)
 
+Include(FetchContent)
+
+FetchContent_Declare(
+        Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG v3.2.0
+)
+
+FetchContent_MakeAvailable(Catch2)
+
 add_subdirectory(src/utils)
 
-add_subdirectory(src/day01)
-add_subdirectory(src/day02)
-add_subdirectory(src/day03)
-add_subdirectory(src/day04)
-add_subdirectory(src/day05)
-add_subdirectory(src/day06)
-add_subdirectory(src/day07)
-add_subdirectory(src/day08)
-add_subdirectory(src/day09)
-add_subdirectory(src/day10)
-add_subdirectory(src/day11)
+add_subdirectory(src)
+
+add_subdirectory(tests)
