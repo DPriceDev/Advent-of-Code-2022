@@ -1,11 +1,9 @@
-#include "file_utils.h"
+#include "Day12.h"
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <ranges>
 #include <list>
-
-// 199 too low
 
 enum Type {
     START,
@@ -133,13 +131,11 @@ auto getLowestStartingHeight(const std::vector<std::string>& lines) -> size_t {
     return shortest;
 }
 
-auto main() -> int {
-    auto lines = file::getLines("input.txt");
-
+auto Day12::partOne(const std::vector<std::string>& lines) -> size_t {
     const auto map = buildMap(lines, nullptr);
-    const auto partOne = stepsToTop(map);
-    const auto partTwo = getLowestStartingHeight(lines);
+    return stepsToTop(map);
+}
 
-    std::cout << "part 1: " << partOne << "\npart 2: " << partTwo;
-    return 0;
+auto Day12::partTwo(const std::vector<std::string>& lines) -> size_t {
+    return getLowestStartingHeight(lines);
 }
