@@ -1,163 +1,109 @@
-#include "file_utils.h"
-#include <iostream>
+#include "Day13.h"
+#include "string_utils.h"
 #include <vector>
 #include <ranges>
 #include <algorithm>
-#include <charconv>
+#include <numeric>
 
-// too low 3112
+enum Result { EQUAL, A, B };
 
-// not correct 3318
-
-// maybe? 4894
-
-// too high 5509
-
-// too high 10986
-
-enum Res {
-    EQUAL,
-    A,
-    B
-};
-
-auto toInt(std::string_view input) -> int {
-    int output;
-    std::from_chars(input.begin(), input.end(), output);
-    return output;
+auto distanceToListEnd(const std::string_view input) -> auto {
+    const auto index = std::ranges::find_if(input, [count = 0] (const auto value) mutable {
+        const auto isFound = value == ']' && count == 0;
+        count += (value == '[') - (value == ']');
+        return isFound;
+    });
+    return index - input.begin();
 }
 
-auto getClosingBracketIndex(const std::string_view input) -> int {
-    auto count = 0;
-    auto index = 0;
-    for (const auto& item: input) {
-        if (item == ']' && count == 0) {
-            return index;
-        }
-        if (item == '[') count++;
-        if (item == ']') count--;
-        index++;
-    }
-    return index;
+auto getValueEnd(const auto start, const auto end) -> decltype(start) {
+    const auto comma = std::find_if(start, end, [] (const auto value) { return value == ','; });
+    return (comma != end) ? comma : std::find_if(start, end, [] (const auto value) { return value == ']'; });
 }
 
-auto comparePackets(std::string packetA, std::string packetB) -> Res {
-    auto bIndex = 1;
-    for (int aIndex = 1; aIndex < packetA.size(); ++aIndex, ++bIndex) {
+auto checkValues(const auto viewA, const auto viewB) -> Result {
+    const auto valueEndA = getValueEnd(viewA.begin(), viewA.end());
+    const auto valueA = string::toInt({ viewA.begin(), valueEndA });
 
-        if (packetA[aIndex] == ',') aIndex++;
-        if (packetB[bIndex] == ',') bIndex++;
+    const auto valueEndB = getValueEnd(viewB.begin(), viewB.end());
+    const auto valueB = string::toInt({ viewB.begin(), valueEndB });
 
-        if (packetA[aIndex] == ']' && packetB[bIndex] == ']') return Res::EQUAL;
-        if (packetA[aIndex] == ']') return Res::A;
-        if (packetB[bIndex] == ']') return Res::B;
+    if (valueA > valueB) return Result::B;
+    if (valueA < valueB) return Result::A;
+    return Result::EQUAL;
+}
+
+// todo: would be nicer to do this with stringviews?
+// potentially instead of adding brackets, could always ignore them?
+// todo: could just set an end condition which is either end of string, or ], and return index of ] ?
+auto comparePackets(std::string packetA, std::string packetB) -> Result {
+    for (long aIndex = 1, bIndex = 1; aIndex < packetA.size(); ++aIndex, ++bIndex) {
+        aIndex += packetA[aIndex] == ',';
+        bIndex += packetB[bIndex] == ',';
+
+        if (packetA[aIndex] == ']' && packetB[bIndex] == ']') return Result::EQUAL;
+        if (packetA[aIndex] == ']') return Result::A;
+        if (packetB[bIndex] == ']') return Result::B;
 
         if (packetA[aIndex] == '[' || packetB[bIndex] == '[') {
 
             if (packetA[aIndex] != '[') {
-                auto comma = std::find_if(packetA.begin() + aIndex, packetA.end(), [] (const auto value) { return value == ','; });
-                auto closing = std::find_if(packetA.begin() + aIndex, packetA.end(), [] (const auto value) { return value == ']'; });
-
-                auto aEnd = (comma != packetA.end()) ? comma : closing;
-
+                const auto aEnd = getValueEnd(packetA.begin() + aIndex, packetA.end());
                 packetA.insert(aEnd, ']');
-               packetA.insert(packetA.begin() + aIndex, '[');
+                packetA.insert(packetA.begin() + aIndex, '[');
             }
 
             if (packetB[bIndex] != '[') {
-                auto comma = std::find_if(packetB.begin() + bIndex, packetB.end(), [] (const auto value) { return value == ','; });
-                auto closing = std::find_if(packetB.begin() + bIndex, packetB.end(), [] (const auto value) { return value == ']'; });
-
-                auto bEnd = (comma != packetB.end()) ? comma : closing;
-
+                const auto bEnd = getValueEnd(packetB.begin() + bIndex, packetB.end());
                 packetB.insert(bEnd, ']');
                 packetB.insert(packetB.begin() + bIndex, '[');
             }
 
-            auto aClosing = getClosingBracketIndex({ packetA.begin() + aIndex + 1, packetA.end() });
-            auto bClosing = getClosingBracketIndex({ packetB.begin() + bIndex + 1, packetB.end() });
+            const auto aLength = distanceToListEnd({ packetA.begin() + aIndex + 1, packetA.end() });
+            const auto bLength = distanceToListEnd({ packetB.begin() + bIndex + 1, packetB.end() });
+            const auto result = comparePackets(
+                    std::string { packetA.begin() + aIndex, packetA.begin() + aIndex + aLength + 2 },
+                    std::string { packetB.begin() + bIndex, packetB.begin() + bIndex + bLength + 2 }
+            );
 
-            auto av = std::string_view { packetA.begin() + aIndex, packetA.begin() + aIndex + aClosing + 1 };
-            auto bv = std::string_view { packetB.begin() + bIndex, packetB.begin() + bIndex + bClosing + 1  };
+            if (result == Result::A) return Result::A;
+            if (result == Result::B) return Result::B;
 
-            auto a = std::string { packetA.begin() + aIndex, packetA.begin() + aIndex + aClosing + 2 };
-            auto b = std::string { packetB.begin() + bIndex, packetB.begin() + bIndex + bClosing + 2  };
-
-            const auto result = comparePackets(a, b);
-
-            if (result == Res::A) return Res::A;
-            if (result == Res::B) return Res::B;
-
-            aIndex += aClosing + 1;
-            bIndex += bClosing + 1;
-            auto test = 2;
+            aIndex += aLength + 1;
+            bIndex += bLength + 1;
             continue;
         }
 
-        auto comma = std::find_if(packetA.begin() + aIndex, packetA.end(), [] (const auto value) { return value == ','; });
-        auto closing = std::find_if(packetA.begin() + aIndex, packetA.end(), [] (const auto value) { return value == ']'; });
-
-        auto aEnd = (comma != packetA.end()) ? comma : closing;
-
-        auto vA = toInt({ packetA.begin() + aIndex, aEnd });
-
-        comma = std::find_if(packetB.begin() + bIndex, packetB.end(), [] (const auto value) { return value == ','; });
-        closing = std::find_if(packetB.begin() + bIndex, packetB.end(), [] (const auto value) { return value == ']'; });
-
-        auto bEnd = (comma != packetB.end()) ? comma : closing;
-
-        auto vB = toInt({ packetB.begin() + bIndex, bEnd });
-
-        // if integers are higher or lower check
-        if (vA > vB) return Res::B;
-        if (vA < vB) return Res::A;
+        const auto result = checkValues(
+            std::string_view { packetA.begin() + aIndex, packetA.end() },
+            std::string_view { packetB.begin() + bIndex, packetB.end() }
+        );
+        if (result != Result::EQUAL) return result;
     }
-    return Res::A;
+    return Result::A;
 }
 
-auto checkInputs(const std::vector<std::string>& lines) -> size_t {
-    auto sum = 0;
-    auto packetIndex = 1;
-    for (int index = 0; index < lines.size(); index += 3) {
+auto Day13::partOne(const std::vector<std::string>& lines) -> size_t {
+    long sum = 0;
+    for (long index = 0, packetIndex = 1; index < lines.size(); index += 3, ++packetIndex) {
         const auto isCorrect = comparePackets(lines[index], lines[index + 1]);
-
-        if (isCorrect == Res::A || isCorrect == Res::EQUAL) sum += packetIndex;
-
-        if (isCorrect == Res::A || isCorrect == Res::EQUAL) std::cout << packetIndex << " ";
-        ++packetIndex;
+        sum += packetIndex * (isCorrect == Result::A || isCorrect == Result::EQUAL);
     }
     return sum;
 }
 
-auto sortPackets(const std::vector<std::string>& lines) {
-    std::vector<std::string> noSpace;
+auto Day13::partTwo(const std::vector<std::string>& lines) -> size_t {
+    std::vector<std::string> packets { };
+    std::ranges::copy_if(lines, std::back_inserter(packets), [] (const auto& line) { return line != ""; });
 
-    for (const auto &item: lines) {
-        if (item != "") noSpace.push_back(item);
-    }
+    packets.emplace_back("[[6]]");
+    packets.emplace_back("[[2]]");
 
-    noSpace.emplace_back("[[6]]");
-    noSpace.emplace_back("[[2]]");
-
-    std::sort(noSpace.begin(), noSpace.end(), [] (const auto& a, const auto& b) {
-        return comparePackets(a, b) == Res::A;
+    std::sort(packets.begin(), packets.end(), [] (const auto& a, const auto& b) {
+        return comparePackets(a, b) == Result::A;
     });
 
-    auto six = std::find(noSpace.begin(), noSpace.end(), "[[6]]");
-    auto two = std::find(noSpace.begin(), noSpace.end(), "[[2]]");
-
-    auto ain = six - noSpace.begin();
-    auto bun = two - noSpace.begin();
-
-    return (six - noSpace.begin() + 1) * (two - noSpace.begin() + 1);
-}
-
-auto main() -> int {
-    const auto lines = file::getLines("input.txt");
-
-    const auto partOne = checkInputs(lines);
-    const auto partTwo = sortPackets(lines);;
-
-    std::cout << "\npart 1: " << partOne << "\npart 2: " << partTwo;
-    return 0;
+    const auto packetSix = std::find(packets.begin(), packets.end(), "[[6]]");
+    const auto packetTwo = std::find(packets.begin(), packets.end(), "[[2]]");
+    return (packetSix - packets.begin() + 1) * (packetTwo - packets.begin() + 1);
 }
