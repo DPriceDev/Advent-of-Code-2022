@@ -1,31 +1,33 @@
 #include "Day13.h"
 #include "string_utils.h"
 #include <vector>
-#include <ranges>
 #include <algorithm>
-#include <numeric>
 
 enum Result { EQUAL, A, B };
 
-auto distanceToListEnd(const std::string_view input) -> auto {
-    const auto index = std::ranges::find_if(input, [count = 0] (const auto value) mutable {
+auto findDistanceToListEnd(const std::string_view input) -> auto {
+    const auto findEnd = [count = 0] (const auto value) mutable {
         const auto isFound = value == ']' && count == 0;
         count += (value == '[') - (value == ']');
         return isFound;
-    });
-    return index - input.begin();
+    };
+    return std::ranges::find_if(input, findEnd) - input.begin();
 }
 
-auto getValueEnd(const auto start, const auto end) -> decltype(start) {
-    const auto comma = std::find_if(start, end, [] (const auto value) { return value == ','; });
-    return (comma != end) ? comma : std::find_if(start, end, [] (const auto value) { return value == ']'; });
+constexpr auto findEndOfValue(const auto start, const auto end) -> decltype(start) {
+    constexpr auto findComma = [] (const auto value) { return value == ','; };
+    const auto comma = std::find_if(start, end, findComma);
+    if (comma != end) return comma;
+
+    constexpr auto findBracket = [] (const auto value) { return value == ']'; };
+    return std::find_if(start, end, findBracket);
 }
 
 auto checkValues(const auto viewA, const auto viewB) -> Result {
-    const auto valueEndA = getValueEnd(viewA.begin(), viewA.end());
+    const auto valueEndA = findEndOfValue(viewA.begin(), viewA.end());
     const auto valueA = string::toInt({ viewA.begin(), valueEndA });
 
-    const auto valueEndB = getValueEnd(viewB.begin(), viewB.end());
+    const auto valueEndB = findEndOfValue(viewB.begin(), viewB.end());
     const auto valueB = string::toInt({ viewB.begin(), valueEndB });
 
     if (valueA > valueB) return Result::B;
@@ -33,9 +35,6 @@ auto checkValues(const auto viewA, const auto viewB) -> Result {
     return Result::EQUAL;
 }
 
-// todo: would be nicer to do this with stringviews?
-// potentially instead of adding brackets, could always ignore them?
-// todo: could just set an end condition which is either end of string, or ], and return index of ] ?
 auto comparePackets(std::string packetA, std::string packetB) -> Result {
     for (long aIndex = 1, bIndex = 1; aIndex < packetA.size(); ++aIndex, ++bIndex) {
         aIndex += packetA[aIndex] == ',';
@@ -48,19 +47,19 @@ auto comparePackets(std::string packetA, std::string packetB) -> Result {
         if (packetA[aIndex] == '[' || packetB[bIndex] == '[') {
 
             if (packetA[aIndex] != '[') {
-                const auto aEnd = getValueEnd(packetA.begin() + aIndex, packetA.end());
+                const auto aEnd = findEndOfValue(packetA.begin() + aIndex, packetA.end());
                 packetA.insert(aEnd, ']');
                 packetA.insert(packetA.begin() + aIndex, '[');
             }
 
             if (packetB[bIndex] != '[') {
-                const auto bEnd = getValueEnd(packetB.begin() + bIndex, packetB.end());
+                const auto bEnd = findEndOfValue(packetB.begin() + bIndex, packetB.end());
                 packetB.insert(bEnd, ']');
                 packetB.insert(packetB.begin() + bIndex, '[');
             }
 
-            const auto aLength = distanceToListEnd({ packetA.begin() + aIndex + 1, packetA.end() });
-            const auto bLength = distanceToListEnd({ packetB.begin() + bIndex + 1, packetB.end() });
+            const auto aLength = findDistanceToListEnd({ packetA.begin() + aIndex + 1, packetA.end() });
+            const auto bLength = findDistanceToListEnd({ packetB.begin() + bIndex + 1, packetB.end() });
             const auto result = comparePackets(
                     std::string { packetA.begin() + aIndex, packetA.begin() + aIndex + aLength + 2 },
                     std::string { packetB.begin() + bIndex, packetB.begin() + bIndex + bLength + 2 }
@@ -94,14 +93,14 @@ auto Day13::partOne(const std::vector<std::string>& lines) -> size_t {
 
 auto Day13::partTwo(const std::vector<std::string>& lines) -> size_t {
     std::vector<std::string> packets { };
-    std::ranges::copy_if(lines, std::back_inserter(packets), [] (const auto& line) { return line != ""; });
+    const auto isNotEmpty = [] (const auto& line) { return line != ""; };
+    std::ranges::copy_if(lines, std::back_inserter(packets), isNotEmpty);
 
     packets.emplace_back("[[6]]");
     packets.emplace_back("[[2]]");
 
-    std::sort(packets.begin(), packets.end(), [] (const auto& a, const auto& b) {
-        return comparePackets(a, b) == Result::A;
-    });
+    const auto compare = [] (const auto& a, const auto& b) { return comparePackets(a, b) == Result::A; };
+    std::sort(packets.begin(), packets.end(), compare);
 
     const auto packetSix = std::find(packets.begin(), packets.end(), "[[6]]");
     const auto packetTwo = std::find(packets.begin(), packets.end(), "[[2]]");
