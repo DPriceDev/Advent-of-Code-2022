@@ -1,40 +1,23 @@
-#include "file_utils.h"
+#include "Day14.h"
 #include "string_utils.h"
-#include <iostream>
 #include <vector>
 #include <ranges>
 #include <regex>
 
-const std::regex regex { R"((\d+,\d+))" };
+class Map {
+public:
+    enum Tile { AIR = 0, ROCK = 1, SAND = 2 };
 
-enum Tile {
-    AIR = 0,
-    ROCK = 1,
-    SAND = 2,
-};
+    explicit Map(size_t width) : width(width) { }
 
-// todo: multi dimension operator
-struct Map {
-    std::vector<std::vector<Tile>> grid { 500 };
-    size_t highest = 0;
+    auto operator[](const size_t y, const size_t x) -> Tile& { return grid[y][x]; }
 
-    // todo: would be good to dynamically resize this grid
+    [[nodiscard]]
+    auto getHeight() const -> size_t { return grid.size(); }
 
-    auto resizeMap(std::size_t x, std::size_t y) {
-        grid.resize(500);
-        for (auto& row: grid) {
-            row.resize(10000);
-        }
-
-        if (y + 1 >= grid.size()) {
-            grid.resize(y + 1);
-        }
-
-        if (x + 1 >= grid.front().size()) {
-            for (auto& row: grid) {
-                row.resize(x + 1);
-            }
-        }
+    auto resizeMap(std::size_t y) {
+        height = ((y + 1 > height) * (y + 1)) + (height * (y + 1 <= height));
+        grid.insert(grid.end(), height - grid.size(), std::vector<Tile> { width, Tile::AIR });
     }
 
     auto insertWall(std::pair<size_t, size_t> start, std::pair<size_t, size_t> end) {
@@ -42,146 +25,85 @@ struct Map {
         const auto maxY = std::max(start.second, end.second);
         const auto minX = std::min(start.first, end.first);
         const auto minY = std::min(start.second, end.second);
+        resizeMap(maxY);
 
-        if (maxY > highest) highest = maxY;
-
-       // print();
-        resizeMap(maxX, maxY);
-
-        for (size_t index = minX; index <= maxX; ++index) {
-            auto la = grid[maxY].size();
-            grid[maxY][index] = Tile::ROCK;
-            auto lb = grid[maxY].size();
-            auto test = 2;
+        for (auto index = minX; index <= maxX; ++index) {
+            operator[](maxY, index) = Tile::ROCK;
         }
 
-        for (size_t index = minY; index <= maxY; ++index) {
-            auto la = grid[index].size();
-            grid[index][maxX] = Tile::ROCK;
-            auto lb = grid[index].size();
-            auto test = 2;
+        for (auto index = minY; index <= maxY; ++index) {
+            operator[](index, maxX) = Tile::ROCK;
         }
     }
 
-    void print() {
-        for (const auto &row: grid) {
-            for (const auto &tile: row) {
-                if (tile == Tile::ROCK) std::cout << '#';
-                if (tile == Tile::SAND) std::cout << 'o';
-                if (tile == Tile::AIR) std::cout << '.';
-            }
-            std::cout << "    " << row.size() << '\n';
-        }
-        std::cout << '\n';
-    }
+private:
+    std::vector<std::vector<Tile>> grid { };
+    size_t height = 0;
+    size_t width = 0;
 };
 
-auto buildMap(const std::vector<std::string>& walls) -> Map {
-    Map map;
+const std::regex regex { R"((\d+,\d+))" };
 
-    std::smatch match;
+auto parseCoords(const std::string& row) -> std::vector<std::pair<size_t, size_t>> {
     std::vector<std::pair<size_t, size_t>> nodes { };
-    for (const auto &wall: walls) {
-        auto start = wall.begin();
-        while (std::regex_search(start, wall.end(), match, regex)) {
-            const auto coords = string::splitString(match[1].str(), ',');
-            start = match.suffix().first;
-            nodes.emplace_back(string::toInt(coords.front()), string::toInt(coords.back()));
-        }
+    std::smatch match;
+    auto start = row.begin();
+    while (std::regex_search(start, row.end(), match, regex)) {
+        const auto coords = string::splitString(match[1].str(), ',');
+        start = match.suffix().first;
+        nodes.emplace_back(string::toInt(coords.front()), string::toInt(coords.back()));
+    }
+    return nodes;
+}
 
+auto buildMap(const std::vector<std::string>& walls) -> Map {
+    Map map { 1000 };
+    for (const auto &wall: walls) {
+        const auto nodes = parseCoords( wall);
         for (int index = 0; index < nodes.size() - 1; ++index) {
-            //std::cout << "inserting " << nodes[index].first << " " << nodes[index].second << " to " << nodes[index + 1].first << " " << nodes[index + 1].second << '\n';
             map.insertWall(nodes[index], nodes[index + 1]);
         }
-        nodes.clear();
     }
-
     return map;
 }
 
 auto countSand(Map map) -> size_t {
-
     auto finished = false;
     auto count = 0;
-    auto currentSand = std::pair<size_t, size_t> { 500, 0 };
+    auto currentSand = std::pair { 500, 0 };
     while (!finished) {
-
-        if (map.grid[currentSand.second + 1][currentSand.first] == AIR) {
-            currentSand.second = currentSand.second + 1;
+        if (map[currentSand.second + 1, currentSand.first] == Map::Tile::AIR) {
+            ++currentSand.second;
         }
-        else if (map.grid[currentSand.second + 1][currentSand.first -1] == AIR) {
-            currentSand.second = currentSand.second + 1;
-            currentSand.first = currentSand.first - 1;
+        else if (map[currentSand.second + 1, currentSand.first -1] == Map::Tile::AIR) {
+            ++currentSand.second;
+            --currentSand.first;
         }
-        else if (map.grid[currentSand.second + 1][currentSand.first + 1] == AIR) {
-            currentSand.second = currentSand.second + 1;
-            currentSand.first = currentSand.first + 1;
+        else if (map[currentSand.second + 1, currentSand.first + 1] == Map::Tile::AIR) {
+            ++currentSand.second;
+            ++currentSand.first;
         }
         else {
-            map.grid[currentSand.second][currentSand.first] = SAND;
-            currentSand = std::pair<size_t, size_t> { 500, 0 };
-            count++;
-           // map.print();
+            map[currentSand.second, currentSand.first] = Map::Tile::SAND;
+            ++count;
+            finished = (finished + (currentSand.first == 500 && currentSand.second == 0)) > 0;
+            currentSand = std::pair { 500, 0 };
         }
 
-        if (currentSand.second >= map.grid.size() - 1) {
-            finished = true;
-        }
+        finished = (finished + (currentSand.second >= map.getHeight() - 1)) > 0;
     }
-
-    map.print();
     return count;
 }
 
-auto countAllSand(Map map) -> size_t {
-
-    auto finished = false;
-    auto count = 0;
-    auto currentSand = std::pair<size_t, size_t> { 500, 0 };
-    while (!finished) {
-
-        auto height = map.highest + 2 - 1;
-        auto atBottom = currentSand.second >= height;
-
-        if (atBottom) {
-            map.grid[currentSand.second][currentSand.first] = SAND;
-            currentSand = std::pair<size_t, size_t> { 500, 0 };
-            count++;
-        }
-        else if (map.grid[currentSand.second + 1][currentSand.first] == AIR) {
-            currentSand.second = currentSand.second + 1;
-        }
-        else if (map.grid[currentSand.second + 1][currentSand.first -1] == AIR) {
-            currentSand.second = currentSand.second + 1;
-            currentSand.first = currentSand.first - 1;
-        }
-        else if (map.grid[currentSand.second + 1][currentSand.first + 1] == AIR) {
-            currentSand.second = currentSand.second + 1;
-            currentSand.first = currentSand.first + 1;
-        }
-        else {
-            map.grid[currentSand.second][currentSand.first] = SAND;
-            count++;
-
-            if (currentSand.first == 500 && currentSand.second == 0) {
-                finished = true;
-            }
-            currentSand = std::pair<size_t, size_t> { 500, 0 };
-        }
-    }
-
-    //map.print();
-    return count;
-}
-
-auto main() -> int {
-    auto walls = file::getLines("input.txt");
-
+auto Day14::partOne(const std::vector<std::string>& walls) -> size_t {
     auto map = buildMap(walls);
+    return countSand(map);
+}
 
-    const auto partOne = countSand(map);
-    const auto partTwo = countAllSand(map);
-
-    std::cout << "part 1: " << partOne << "\npart 2: " << partTwo;
-    return 0;
+auto Day14::partTwo(const std::vector<std::string>& walls) -> size_t {
+    auto map = buildMap(walls);
+    std::pair<size_t, size_t> start { 0, map.getHeight() + 1 };
+    std::pair<size_t, size_t> end { 999, map.getHeight() + 1 };
+    map.insertWall(start, end);
+    return countSand(map);
 }

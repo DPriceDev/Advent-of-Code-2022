@@ -7,6 +7,7 @@ add_executable(tests
         day11/Day11Tests.cpp
         day12/Day12Tests.cpp
         day13/Day13Tests.cpp
+        day14/Day14Tests.cpp
 )
 target_link_libraries(tests PRIVATE
         day_06
@@ -15,6 +16,7 @@ target_link_libraries(tests PRIVATE
         day_11
         day_12
         day_13
+        day_14
         util
 )
 target_compile_features(tests INTERFACE cxx_std_23)
