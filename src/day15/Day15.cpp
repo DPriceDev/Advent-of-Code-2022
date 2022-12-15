@@ -141,11 +141,99 @@ auto partOne(std::vector<std::string>& sensorsInput) -> size_t {
     return sum;
 }
 
+auto partTwo(std::vector<std::string>& sensorsInput) -> size_t {
+    //const auto rowToCheck = 10;
+
+    std::vector<Range> ranges { };
+
+    std::vector<Sensor> sensors { };
+
+    for (const auto &sensorInput: sensorsInput) {
+        const auto sensor = parseSensor(sensorInput);
+        sensors.push_back(sensor);
+    }
+    const auto max = 4000000;
+
+    for (int rowToCheck = 0; rowToCheck < max; ++rowToCheck) {
+
+        for (const auto &sensor: sensors) {
+            const auto yDiff = std::abs(sensor.position.y - sensor.nearestBeacon.y);
+            const auto xDiff = std::abs(sensor.nearestBeacon.x - sensor.position.x);
+            const auto halfSize = std::abs(xDiff + yDiff);
+
+            const auto t = sensor.position.y - rowToCheck;
+            auto ta = t < halfSize;
+            auto tb = t > -(halfSize);
+            if (ta && tb) {
+                const auto widthAtRow = std::abs(halfSize - std::abs(rowToCheck - sensor.position.y));
+
+                auto range = Range { sensor.position.x - widthAtRow, sensor.position.x + widthAtRow };
+
+                for (auto &existing: ranges) {
+                    existing.subtract(range);
+                }
+
+                if (range.isValid) {
+                    ranges.push_back(range);
+                }
+            }
+        }
+//        if (rowToCheck % 100000 == 0) {
+//            std::cout << "\n" << "row: " << rowToCheck << "\n";
+//        }
+
+
+//        for (int index = 0; index < ranges.size(); ++index) {
+//            std::cout << ranges[index].start << " - " << ranges[index].end << " ";
+//        }
+//        std::cout << "\n";
+
+        std::sort(ranges.begin(), ranges.end(), [] (Range& a, Range& b) {
+            return a.start < b.start;
+        });
+
+//        for (int index = 0; index < ranges.size(); ++index) {
+//            std::cout << ranges[index].start << " - " << ranges[index].end << " ";
+//        }
+//        std::cout << "\n";
+
+        std::vector<Range> out { };
+
+        std::copy_if(ranges.begin(), ranges.end(), std::back_inserter(out), [] (const Range& r) {
+            return r.isValid;
+        });
+
+        std::sort(out.begin(), out.end(), [] (Range& a, Range& b) {
+            return a.start < b.start;
+        });
+
+//        for (int index = 0; index < out.size(); ++index) {
+//            std::cout << out[index].start << " - " << out[index].end << " ";
+//        }
+//        std::cout << "\n";
+//        std::cout << "\n";
+//        std::cout << "\n";
+        for (int index = 0; index < out.size() - 1; ++index) {
+            if (out[index].end < 0 || out[index].end > max - 1) continue;
+
+            if (out[index].end + 1 != out[index + 1].start) {
+                std::cout << "x: " << out[index].end + 1 << " y: " << rowToCheck << "\n";
+                return ((out[index].end + 1) * 4000000) + rowToCheck;
+            }
+        }
+//        for (const auto& range: ranges) {
+//            if (range.)
+//        }
+
+        ranges.clear();
+    }
+    return 0;
+}
+
 auto main() -> int {
     auto sensors = file::getLines("input.txt");
 
-    const auto partTwo = 0;
 
-    std::cout << "part 1: " << partOne(sensors) << "\npart 2: " << partTwo;
+    std::cout << "part 1: " << partOne(sensors) << "\npart 2: " << partTwo(sensors);
     return 0;
 }
