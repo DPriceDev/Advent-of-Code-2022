@@ -9,8 +9,8 @@ auto string::splitString(const std::string_view toSplit, const char delimiter) -
     return output;
 }
 
-auto string::toInt(std::string_view input) -> size_t {
-    int output;
+auto string::toInt(const std::string_view input) -> long {
+    long output;
     std::from_chars(input.begin(), input.end(), output);
     return output;
 }

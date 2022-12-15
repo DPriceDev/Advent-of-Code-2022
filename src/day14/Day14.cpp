@@ -1,7 +1,6 @@
 #include "Day14.h"
 #include "string_utils.h"
 #include <vector>
-#include <ranges>
 #include <regex>
 
 class Map {
