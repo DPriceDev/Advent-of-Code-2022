@@ -15,4 +15,10 @@ auto string::toInt(const std::string_view input) -> long {
     return output;
 }
 
+auto string::trimLeft(const std::string_view value) -> std::string_view {
+    const auto find = std::ranges::find_if(value, [] (const auto letter) {
+        return letter != ' ';
+    });
+    return std::string_view { find, value.end() };
+}
 
